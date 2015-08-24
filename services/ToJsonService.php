@@ -42,7 +42,19 @@ class ToJsonService extends BaseApplicationComponent {
     // Is this an image?
     if ( $entry instanceof \Craft\AssetFileModel && $entry->kind == 'image' ) {
       $json['url'] = $entry->url;
-      $json['thumbnail'] = $entry->setTransform(array('mode'=>'fit', 'width'=>'100'))->url;
+      $json['width'] = $entry->width;
+      $json['height'] = $entry->height;
+      // $json['thumbnail'] = $entry->setTransform(array('mode'=>'fit', 'width'=>'100'))->url;
+
+      $json['variations'] = array();
+      foreach( craft()->assetTransforms->getAllTransforms() as $transform ) {
+        // $transform => AssetTransformModel
+        $img = array();
+        $img['url'] = $entry->setTransform($transform)->url;
+        $img['width'] = $entry->width;
+        $img['height'] = $entry->height;
+        $json['variations'][$transform->name] = $img;
+      }
     }
 
     foreach ( $fields as $f ) {
