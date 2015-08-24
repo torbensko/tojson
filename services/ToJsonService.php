@@ -27,6 +27,7 @@ class ToJsonService extends BaseApplicationComponent {
   private function processModel($entry, $entryDepth=1) 
   {
     $json = array();
+    $json['fields'] = array();
     $fields = null;
 
     // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
@@ -74,7 +75,8 @@ class ToJsonService extends BaseApplicationComponent {
       $type = $fieldObj->type;
       $value = $entry->$name;
 
-      $json[$name.'_type'] = $type;
+      // TODO: add more details for each field type, such as max/min for integers
+      $json['fields'][$name] = array("type" => $type);
 
       // Debug:
       // $json[$name.'-'.$type] = $type;
