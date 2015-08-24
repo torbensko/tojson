@@ -35,8 +35,11 @@ class ToJsonService extends BaseApplicationComponent {
     }
     
     $json = array();
-    if ( $entry->title != null ) {
+    if ( $entry->title ) {
       $json['title'] = $entry->title;
+    }
+    if ( $entry->uri ) {
+      $json['uri'] = $entry->uri;
     }
     
     // Is this an image?
@@ -46,6 +49,7 @@ class ToJsonService extends BaseApplicationComponent {
       $json['height'] = $entry->height;
       // $json['thumbnail'] = $entry->setTransform(array('mode'=>'fit', 'width'=>'100'))->url;
 
+      // Create all the possible image variations
       $json['variations'] = array();
       foreach( craft()->assetTransforms->getAllTransforms() as $transform ) {
         // $transform => AssetTransformModel
@@ -53,7 +57,7 @@ class ToJsonService extends BaseApplicationComponent {
         $img['url'] = $entry->setTransform($transform)->url;
         $img['width'] = $entry->width;
         $img['height'] = $entry->height;
-        $json['variations'][$transform->name] = $img;
+        $json['variations'][$transform->handle] = $img;
       }
     }
 
