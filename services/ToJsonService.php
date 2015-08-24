@@ -29,22 +29,24 @@ class ToJsonService extends BaseApplicationComponent {
     $json = array();
     $fields = null;
 
-    $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
-    $json['_model'] = $json['_model'][count($json['_model']) - 1];
+    // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
+    // $json['_model'] = $json['_model'][count($json['_model']) - 1];
 
     if ( $entry instanceof \Craft\EntryModel || $entry instanceof \Craft\MatrixBlockModel ) {
       $fields = $entry->getType()->getFieldLayout()->getFields();
-      $json['_modelType'] = $entry->getType()->handle;
+      $json['model_type'] = $entry->getType()->handle;
+      if ( $entry instanceof \Craft\EntryModel ) {
+        $json['section'] = $entry->getSection()->handle;
+      }
     } else {
       // Tags, Categories
       $fields = $entry->getFieldLayout()->getFields();
     }
-    
-    if ( $entry->title ) {
-      $json['title'] = $entry->title;
-    }
     if ( $entry->uri ) {
       $json['uri'] = $entry->uri;
+    }
+    if ( $entry->title ) {
+      $json['title'] = $entry->title;
     }
     
     // Is this an image?
@@ -72,6 +74,8 @@ class ToJsonService extends BaseApplicationComponent {
       $type = $fieldObj->type;
       $value = $entry->$name;
 
+      $json[$name.'_type'] = $type;
+
       // Debug:
       // $json[$name.'-'.$type] = $type;
       // $json[$name.'-class'] = get_class($value);
@@ -88,7 +92,8 @@ class ToJsonService extends BaseApplicationComponent {
         case 'Tags':
         case 'Assets':
           // value => Craft\ElementCriteriaModel
-          if ( !($type == 'Entries' || $entryDepth <= 0) ) {
+          $json[$name] = null;
+          if ( !($type == 'Entries' && $entryDepth <= 0) ) {
             $json[$name] = array();
             foreach ($value as $submodel) {
               $subJson = $this->processModel($submodel, ($type == 'Entries' ? $entryDepth - 1 : $entryDepth));
