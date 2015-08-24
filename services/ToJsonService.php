@@ -26,15 +26,20 @@ class ToJsonService extends BaseApplicationComponent {
    */
   private function processModel($entry, $entryDepth=1) 
   {
+    $json = array();
     $fields = null;
+
+    $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
+    $json['_model'] = $json['_model'][count($json['_model']) - 1];
+
     if ( $entry instanceof \Craft\EntryModel || $entry instanceof \Craft\MatrixBlockModel ) {
       $fields = $entry->getType()->getFieldLayout()->getFields();
+      $json['_modelType'] = $entry->getType()->handle;
     } else {
       // Tags, Categories
       $fields = $entry->getFieldLayout()->getFields();
     }
     
-    $json = array();
     if ( $entry->title ) {
       $json['title'] = $entry->title;
     }
