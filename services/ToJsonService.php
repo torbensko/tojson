@@ -1,19 +1,5 @@
 <?php
 
-/*
-
-Craft\ElementCriteriaModel:
-  Matrix
-    children: Craft\MatrixBlockModel
-  Entries
-    children: Craft\EntryModel
-  Assets
-    children:
-
-Craft\RichTextData
-
-*/
-
 namespace Craft;
 
 class ToJsonService extends BaseApplicationComponent {
@@ -22,16 +8,13 @@ class ToJsonService extends BaseApplicationComponent {
 
     $json = array();
 
-    if (is_array($content)) {
+    if ( is_array($content) ) {
       foreach ($content as $entry) {
         array_push($json, $this->processModel($entry, $entryDepth));
       }
 
     } elseif ( is_object($content) ) {
       $json = $this->processModel($content, $entryDepth);
-
-    } else {
-      $json = null;
     }
 
     return $json;
@@ -39,12 +22,28 @@ class ToJsonService extends BaseApplicationComponent {
 
 
   /*
-   * Processes Entries and Matrix blocks.
+   * Processes Entries, Assets, Matrix blocks, Tags and Categories.
    */
   private function processModel($entry, $entryDepth=1) 
   {
-    $fields = $entry->getType()->getFieldLayout()->getFields();
+    $fields = null;
+    if ( $entry instanceof \Craft\EntryModel || $entry instanceof \Craft\MatrixBlockModel ) {
+      $fields = $entry->getType()->getFieldLayout()->getFields();
+    } else {
+      // Tags, Categories
+      $fields = $entry->getFieldLayout()->getFields();
+    }
+    
     $json = array();
+    if ( $entry->title != null ) {
+      $json['title'] = $entry->title;
+    }
+    
+    // Is this an image?
+    if ( $entry instanceof \Craft\AssetFileModel && $entry->kind == 'image' ) {
+      $json['url'] = $entry->url;
+      $json['thumbnail'] = $entry->setTransform(array('mode'=>'fit', 'width'=>'100'))->url;
+    }
 
     foreach ( $fields as $f ) {
       $fieldObj = $f->getField();
@@ -52,17 +51,23 @@ class ToJsonService extends BaseApplicationComponent {
       $type = $fieldObj->type;
       $value = $entry->$name;
 
-      // echo $type."\n";
-      // if (is_object($value)) {
-      //   echo get_class($value)."\n";
-      // }
+      // Debug:
+      // $json[$name.'-'.$type] = $type;
+      // $json[$name.'-class'] = get_class($value);
+
+      if ( $value == null ) {
+        break;
+      }
 
       switch ($type) {
         // Relationships:
         case 'Entries':
         case 'Matrix':
+        case 'Categories':
+        case 'Tags':
+        case 'Assets':
           // value => Craft\ElementCriteriaModel
-          if ( $type != 'Entries' || $entryDepth > 0) {
+          if ( !($type == 'Entries' || $entryDepth <= 0) ) {
             $json[$name] = array();
             foreach ($value as $submodel) {
               $subJson = $this->processModel($submodel, ($type == 'Entries' ? $entryDepth - 1 : $entryDepth));
@@ -71,47 +76,54 @@ class ToJsonService extends BaseApplicationComponent {
           }
           break;
 
-        case 'Assets':
-          $json[$name] = array();
-          foreach ($value as $assetObj) {
-            // $asset => AssetFileModel
-            $assetJson = array();
-            $assetJson['url'] = $assetObj->url;
-            $assetJson['thumbnail'] = $assetObj->setTransform(array('mode'=>'fit', 'width'=>'100'))->url;
-            array_push($json[$name], $assetJson);
-          }
-          break;
-
         case 'RichText':
           $json[$name] = $value->getRawContent();
           break;
 
         case 'RadioButtons':
+        case 'Dropdown':
           // $value => Craft\SingleOptionFieldData
           $json[$name] = $value->value;
           break;
 
+        case 'MultiSelect':
+          // $value => Craft\MultiOptionsFieldData
+          $json[$name] = array();
+          foreach ($value as $v) {
+            array_push($json[$name], $v->value);
+          }
+          break;
+
+        case 'Date':
+          // value => Craft\DateTime
+          $json[$name] = $value->iso8601();
+          break;
+
+        case 'Table':
+          // value => Array
+          $tableJson = array();
+          foreach ($value as $row) {
+            // All values are repeated with generic names and those given in the field. We stick to the values.
+            array_push($tableJson, array_values(array_slice($row, 0, count($row)/2)));
+          }
+          $json[$name] = $tableJson;
+          break;
+
         case 'PlainText':
-          // value is a String
+        case 'Color':
+          // value => String
           $json[$name] = $value;
           break;
 
+        case 'Number':
+          // value => String
+          $json[$name] = floatval($value);
+          break;
+
         default:
-          // unknown type (dump some stuff to help us debug what we're looking at)
+          // Unknown type. We dump some stuff to help us debug what we're looking at
           $json[$name] = print_r($value, true);
       }
-
-      // if ( $value instanceof \Craft\ElementCriteriaModel ) {
-        
-      // } else if ( $value instanceof \Craft\RichTextData ) {
-        
-      // } else if ( $value instanceof \Craft\SingleOptionFieldData ) {
-      //   $json[$name] = $value->value;
-      // } else if ( is_string($value) ) {
-      //   $json[$name] = $value;
-      // } else {
-        
-      // }
     }
     return $json;
   }
