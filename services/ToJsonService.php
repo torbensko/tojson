@@ -82,7 +82,7 @@ class ToJsonService extends BaseApplicationComponent {
       // $json[$name.'-'.$type] = $type;
       // $json[$name.'-class'] = get_class($value);
 
-      if ( $value == null ) {
+      if ( $value === null ) {
         break;
       }
 
