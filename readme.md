@@ -2,7 +2,7 @@
 
 A Craft plugin for exporting your entries to JSON. It provides the following features:
 
-- supports all field types including Entries, Matrix blocks and Assets
+- supports most field types including Entries, Matrix blocks and Assets
 - it applies all image transformation automatically
 
 
@@ -29,7 +29,7 @@ A Craft plugin for exporting your entries to JSON. It provides the following fea
 - Done!
 
 
-## Extras
+## Advanced
 
 ### Image transformation
 
@@ -64,3 +64,19 @@ your asset source:
   top-left, top-center, top-right
   center-left, center-center
   center-right, bottom-left, bottom-center, bottom-right
+
+
+### Model details
+
+The plugin provides the following additional details: 
+
+- _model: The template name for the entry or matrix block.
+- _schema: A list of the fields and their Craft model type, e.g. `RichText` or `Entries`
+- _section: The name of the section
+
+
+
+## To do
+
+- support for related users
+- automatic detection of cyclic models

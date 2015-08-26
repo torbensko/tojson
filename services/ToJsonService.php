@@ -4,7 +4,7 @@ namespace Craft;
 
 class ToJsonService extends BaseApplicationComponent {
 
-  public function toJson($content, $entryDepth=1) {
+  public function toJson($content, $entryDepth=2) {
 
     $json = array();
 
@@ -27,7 +27,7 @@ class ToJsonService extends BaseApplicationComponent {
   private function processModel($entry, $entryDepth=1) 
   {
     $json = array();
-    $json['fields'] = array();
+    $json['_schema'] = array();
     $fields = null;
 
     // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
@@ -35,9 +35,9 @@ class ToJsonService extends BaseApplicationComponent {
 
     if ( $entry instanceof \Craft\EntryModel || $entry instanceof \Craft\MatrixBlockModel ) {
       $fields = $entry->getType()->getFieldLayout()->getFields();
-      $json['model_type'] = $entry->getType()->handle;
+      $json['_model'] = $entry->getType()->handle;
       if ( $entry instanceof \Craft\EntryModel ) {
-        $json['section'] = $entry->getSection()->handle;
+        $json['_section'] = $entry->getSection()->handle;
       }
     } else {
       // Tags, Categories
@@ -45,9 +45,11 @@ class ToJsonService extends BaseApplicationComponent {
     }
     if ( $entry->uri ) {
       $json['uri'] = $entry->uri;
+      $json['_schema']['uri'] = array('type' => 'String');
     }
     if ( $entry->title ) {
       $json['title'] = $entry->title;
+      $json['_schema']['title'] = array('type' => 'String');
     }
     
     // Apply the image transformations
@@ -88,7 +90,7 @@ class ToJsonService extends BaseApplicationComponent {
       $value = $entry->$name;
 
       // TODO: add more details for each field type, such as max/min for integers
-      $json['fields'][$name] = array("type" => $type);
+      $json['_schema'][$name] = array("type" => $type);
 
       // Debug:
       // $json[$name.'-'.$type] = $type;
