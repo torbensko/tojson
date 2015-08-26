@@ -50,12 +50,24 @@ class ToJsonService extends BaseApplicationComponent {
       $json['title'] = $entry->title;
     }
     
-    // Is this an image?
+    // Apply the image transformations
     if ( $entry instanceof \Craft\AssetFileModel && $entry->kind == 'image' ) {
-      $json['url'] = $entry->url;
-      $json['width'] = $entry->width;
-      $json['height'] = $entry->height;
-      // $json['thumbnail'] = $entry->setTransform(array('mode'=>'fit', 'width'=>'100'))->url;
+      
+      $json['url_src'] = $entry->url;
+      $json['width_src'] = $json['width'] = $entry->width;
+      $json['height_src'] = $json['height'] = $entry->height;
+      $json['quality'] = 100;
+      $json['mode'] = 'crop';
+      $json['cropPosition'] = 'center-center';
+
+      // Provide explicit sizing details
+      if ($entry->imageWidth) { $json['width'] = $entry->imageWidth; }
+      if ($entry->imageHeight) { $json['height'] = $entry->imageHeight; }
+      if ($entry->imageQuality) { $json['quality'] = $entry->imageQuality; }
+      if ($entry->imageMode) { $json['mode'] = $entry->imageMode->value; }
+      if ($entry->imageMode->value === 'crop' && $entry->imageCropPosition) { $json['cropPosition'] = $entry->imageCropPosition; }
+
+      $json['url'] = $entry->setTransform($json)->url;
 
       // Create all the possible image variations
       $json['variations'] = array();
