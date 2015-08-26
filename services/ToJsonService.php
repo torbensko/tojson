@@ -65,7 +65,7 @@ class ToJsonService extends BaseApplicationComponent {
       if ($entry->imageHeight) { $json['height'] = $entry->imageHeight; }
       if ($entry->imageQuality) { $json['quality'] = $entry->imageQuality; }
       if ($entry->imageMode) { $json['mode'] = $entry->imageMode->value; }
-      if ($entry->imageMode->value === 'crop' && $entry->imageCropPosition) { $json['cropPosition'] = $entry->imageCropPosition; }
+      if ($entry->imageMode->value === 'crop' && $entry->imageCropPosition) { $json['cropPosition'] = $entry->imageCropPosition->value; }
 
       $json['url'] = $entry->setTransform($json)->url;
 
