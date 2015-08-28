@@ -158,6 +158,7 @@ class ToJsonService extends BaseApplicationComponent {
           break;
 
         case 'Number':
+        case 'Lightswitch':
           // value => String
           $json[$name] = floatval($value);
           break;
