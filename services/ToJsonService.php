@@ -62,12 +62,12 @@ class ToJsonService extends BaseApplicationComponent {
       $json['mode'] = 'crop';
       $json['cropPosition'] = 'center-center';
 
-      // Provide explicit sizing details
-      if ($entry->imageWidth) { $json['width'] = $entry->imageWidth; }
-      if ($entry->imageHeight) { $json['height'] = $entry->imageHeight; }
-      if ($entry->imageQuality) { $json['quality'] = $entry->imageQuality; }
-      if ($entry->imageMode) { $json['mode'] = $entry->imageMode->value; }
-      if ($entry->imageMode->value === 'crop' && $entry->imageCropPosition) { $json['cropPosition'] = $entry->imageCropPosition->value; }
+      // Allow per-image resizing
+      if (isset($entry->imageWidth)) { $json['width'] = $entry->imageWidth; }
+      if (isset($entry->imageHeight)) { $json['height'] = $entry->imageHeight; }
+      if (isset($entry->imageQuality)) { $json['quality'] = $entry->imageQuality; }
+      if (isset($entry->imageMode)) { $json['mode'] = $entry->imageMode->value; }
+      if (isset($entry->imageMode) && $entry->imageMode->value === 'crop' && $entry->imageCropPosition) { $json['cropPosition'] = $entry->imageCropPosition->value; }
 
       $json['url'] = $entry->setTransform($json)->url;
 
