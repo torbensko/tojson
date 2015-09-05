@@ -27,6 +27,12 @@ class ToJsonService extends BaseApplicationComponent {
   private function processModel($entry, $entryDepth=1) 
   {
     $json = array();
+
+    // Some basic details
+    $json['id'] = $entry->id;
+    $json['slug'] = $entry->slug;
+    $json['uri'] = $entry->uri;
+
     $json['_schema'] = array();
     $fields = null;
 
@@ -43,13 +49,8 @@ class ToJsonService extends BaseApplicationComponent {
       // Tags, Categories
       $fields = $entry->getFieldLayout()->getFields();
     }
-    if ( $entry->uri ) {
-      $json['uri'] = $entry->uri;
-      $json['_schema']['uri'] = array('type' => 'String');
-    }
     if ( $entry->title ) {
       $json['title'] = $entry->title;
-      $json['_schema']['title'] = array('type' => 'String');
     }
     
     // Apply the image transformations
