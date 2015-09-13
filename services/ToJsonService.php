@@ -33,7 +33,7 @@ class ToJsonService extends BaseApplicationComponent {
     $json['slug'] = $entry->slug;
     $json['uri'] = $entry->uri;
 
-    $json['_schema'] = array();
+    // $json['_schema'] = array();
     $fields = null;
 
     // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
@@ -55,22 +55,11 @@ class ToJsonService extends BaseApplicationComponent {
     
     // Apply the image transformations
     if ( $entry instanceof \Craft\AssetFileModel && $entry->kind == 'image' ) {
-      
-      $json['url_src'] = $entry->url;
-      $json['width_src'] = $json['width'] = $entry->width;
-      $json['height_src'] = $json['height'] = $entry->height;
-      $json['quality'] = 100;
-      $json['mode'] = 'crop';
-      $json['cropPosition'] = 'center-center';
 
-      // Allow per-image resizing
-      if (isset($entry->imageWidth)) { $json['width'] = $entry->imageWidth; }
-      if (isset($entry->imageHeight)) { $json['height'] = $entry->imageHeight; }
-      if (isset($entry->imageQuality)) { $json['quality'] = $entry->imageQuality; }
-      if (isset($entry->imageMode)) { $json['mode'] = $entry->imageMode->value; }
-      if (isset($entry->imageMode) && $entry->imageMode->value === 'crop' && $entry->imageCropPosition) { $json['cropPosition'] = $entry->imageCropPosition->value; }
-
-      $json['url'] = $entry->setTransform($json)->url;
+      // Base details
+      $json['url'] = $entry->url;
+      $json['width'] = $entry->width;
+      $json['height'] = $entry->height;
 
       // Create all the possible image variations
       $json['variations'] = array();
@@ -82,6 +71,36 @@ class ToJsonService extends BaseApplicationComponent {
         $img['height'] = $entry->height;
         $json['variations'][$transform->handle] = $img;
       }
+
+      // Per-image sizing
+      if ( isset($entry->customMode) && strlen($entry->customMode->value) ) {
+        $custom = array();
+
+        $custom['mode'] = $entry->customMode->value;
+        $custom['width'] = isset($entry->customWidth) && $entry->customWidth > 0 ? 
+            $entry->customWidth : 
+            $entry->width;
+        $custom['height'] = isset($entry->customHeight) && $entry->customHeight > 0 ? 
+            $entry->customHeight : 
+            $entry->height;
+        $custom['quality'] = isset($entry->customQuality) && $entry->customQuality > 0 ? 
+            $entry->customQuality : 
+            100;
+
+        if ( $entry->customMode->value == 'crop' ) {
+          $custom['position'] = isset($entry->customPosition) && strlen($entry->customPosition->value) ?
+              $entry->customPosition->value : 
+              'center-center';
+        }
+        if ( isset($entry->customFormat) && strlen($entry->customFormat->value) ) {
+          $custom['format'] = $entry->customFormat->value;
+        }
+
+        // Compute the URL
+        $custom['url'] = $entry->setTransform($custom)->url;
+
+        $json['variations']['_custom'] = $custom;
+      }
     }
 
     foreach ( $fields as $f ) {
@@ -91,7 +110,7 @@ class ToJsonService extends BaseApplicationComponent {
       $value = $entry->$name;
 
       // TODO: add more details for each field type, such as max/min for integers
-      $json['_schema'][$name] = array("type" => $type);
+      // $json['_schema'][$name] = array("type" => $type);
 
       // Debug:
       // $json[$name.'-'.$type] = $type;

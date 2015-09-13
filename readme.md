@@ -11,13 +11,16 @@ A Craft plugin for exporting your entries to JSON. It provides the following fea
 
 - Add the `tojson` folder to your `craft/plugins` directory.
 
-  If you would prefer not to mannually copy the repo files, 
-  you can add it as a Git submodule. This allows you
-  update it in the future via Git. 
+  *Advanced tip:* You can add the plugin as a Git submodule, which makes it easier to keep it up-to-date.
 
-  To do so, run the command:
+  Add module:
 
   		git submodule add git@github.com:torbensko/tojson.git craft/plugins/tojson
+
+  Update module:
+
+      cd craft/plugins/tojson
+      git pull
 
 - Within Craft, enable the plugin under the plugin menu.
 
@@ -31,52 +34,247 @@ A Craft plugin for exporting your entries to JSON. It provides the following fea
 
 ## Advanced
 
-### Image transformation
+The plugin should work out of the box, but there are a few extra things it can do to help out.
 
-To make it possible to apply an image transformation to your images, the system
-automatically applies all transformations to each image. The resulting URLs are
-placed in a variations field, like so:
 
-    ...
-    "url": "http://SERVER/cpresources/transforms/8?x=E2VKeJMte",
-    "variations": {
-      "TRANSFORM_NAME": {
-        "url": "http://S3.amazonaws.com/BUCKET/TRANSFORM_NAME/IMAGE.jpg",
-        "width": "300",
-        "height": "300"
+### Image transformations
+
+The plugin applies all transformations to each image. The resulting URLs are placed in a `variations` field.
+
+You can also manually resize each image by adding the following fields to your asset source:
+
+- *customWidth*
+- *customHeight*
+- *customQuality*
+- *customMode*
+- *customPosition*
+
+The allowable values for each can be found on the [Craft site](http://buildwithcraft.com/docs/image-transforms). The resulting image will be added to the `variations` field under the name `_custom`.
+
+Your resulting JSON will look something like:
+
+    {
+      "id": "28",
+      "slug": "sw-blake-bronstad-1400x965",
+      "uri": null,
+      "title": "Sleepy kitty",
+      "url": "http://s3-ap-southeast-2.amazonaws.com/torbenskocom-assets/SW_Blake-Bronstad-1400x965.jpg",
+      "width": "1400",
+      "height": "965",
+      "variations": {
+        "squareMedium": {
+          "url": "http://s3-ap-southeast-2.amazonaws.com/torbenskocom-assets/_squareMedium/SW_Blake-Bronstad-1400x965.jpg",
+          "width": "400",
+          "height": "400"
+        },
+        "squareSmall": {
+          "url": "http://s3-ap-southeast-2.amazonaws.com/torbenskocom-assets/_squareSmall/SW_Blake-Bronstad-1400x965.jpg",
+          "width": "200",
+          "height": "200"
+        },
+        "_custom": {
+          "mode": "crop",
+          "width": "600",
+          "height": "200",
+          "quality": "50",
+          "position": "center-left",
+          "url": "http://s3-ap-southeast-2.amazonaws.com/torbenskocom-assets/_600x200_crop_center-left_50/SW_Blake-Bronstad-1400x965.jpg"
+        }
       },
-      "TRANSFORM_NAME": {
-        "url": "http://S3.amazonaws.com/BUCKET/TRANSFORM_NAME/IMAGE.jpg",
-        "width": "400",
-        "height": "400"
-      }
+      "credit": "Sourced from Magdeleine.co",
+      "customWidth": 600,
+      "customHeight": 200,
+      "customMode": "crop",
+      "customPosition": "center-left",
+      "customFormat": null,
+      "customQuality": 50
     }
 
-You can also manually resize each image. To do so add the following fields to
-your asset source:
 
-- imageWidth
-- imageHeight
-- imageQuality
-- imageMode:
-  fit, crop, stretch
-- imageCropPosition: 
-  top-left, top-center, top-right
-  center-left, center-center
-  center-right, bottom-left, bottom-center, bottom-right
+*Advanced:* if you are using the [Art Vandelay - Import/Export plugin](https://github.com/xodigital/ArtVandelay), you can import these fields using the following JSON:
+
+    {
+      "assets": [],
+      "categories": [],
+      "fields": {
+        "Images": {
+          "customFormat": {
+            "name": "Format",
+            "context": "global",
+            "instructions": "",
+            "translatable": 0,
+            "type": "Dropdown",
+            "settings": {
+              "options": [
+                {
+                  "label": "Auto",
+                  "value": "",
+                  "default": ""
+                },
+                {
+                  "label": "JPEG",
+                  "value": "jpg",
+                  "default": ""
+                },
+                {
+                  "label": "PNG",
+                  "value": "png",
+                  "default": ""
+                },
+                {
+                  "label": "GIF",
+                  "value": "gif",
+                  "default": ""
+                }
+              ]
+            }
+          },
+          "customHeight": {
+            "name": "Height",
+            "context": "global",
+            "instructions": "",
+            "translatable": 0,
+            "type": "Number",
+            "settings": {
+              "min": 0,
+              "max": "",
+              "decimals": 0
+            }
+          },
+          "customMode": {
+            "name": "Mode",
+            "context": "global",
+            "instructions": "",
+            "translatable": 0,
+            "type": "RadioButtons",
+            "settings": {
+              "options": [
+                {
+                  "label": "None",
+                  "value": "",
+                  "default": ""
+                },
+                {
+                  "label": "Crop",
+                  "value": "crop",
+                  "default": ""
+                },
+                {
+                  "label": "Fit",
+                  "value": "fit",
+                  "default": ""
+                },
+                {
+                  "label": "Stretch",
+                  "value": "stretch",
+                  "default": ""
+                }
+              ]
+            }
+          },
+          "customPosition": {
+            "name": "Position",
+            "context": "global",
+            "instructions": "Only applicable when using crop mode",
+            "translatable": 0,
+            "type": "RadioButtons",
+            "settings": {
+              "options": [
+                {
+                  "label": "Top-Left",
+                  "value": "top-left",
+                  "default": ""
+                },
+                {
+                  "label": "Top-Center",
+                  "value": "top-center",
+                  "default": ""
+                },
+                {
+                  "label": "Top-Right",
+                  "value": "top-right",
+                  "default": ""
+                },
+                {
+                  "label": "Center-Left",
+                  "value": "center-left",
+                  "default": ""
+                },
+                {
+                  "label": "Center-Center",
+                  "value": "center-center",
+                  "default": ""
+                },
+                {
+                  "label": "Center-Right",
+                  "value": "center-right",
+                  "default": ""
+                },
+                {
+                  "label": "Bottom-Left",
+                  "value": "bottom-left",
+                  "default": ""
+                },
+                {
+                  "label": "Bottom-Center",
+                  "value": "bottom-center",
+                  "default": ""
+                },
+                {
+                  "label": "Bottom-Right",
+                  "value": "bottom-right",
+                  "default": ""
+                }
+              ]
+            }
+          },
+          "customQuality": {
+            "name": "Quality",
+            "context": "global",
+            "instructions": "",
+            "translatable": 0,
+            "type": "Number",
+            "settings": {
+              "min": 0,
+              "max": 100,
+              "decimals": 0
+            }
+          },
+          "customWidth": {
+            "name": "Width",
+            "context": "global",
+            "instructions": "",
+            "translatable": 0,
+            "type": "Number",
+            "settings": {
+              "min": 0,
+              "max": "",
+              "decimals": 0
+            }
+          }
+        }
+      },
+      "globals": [],
+      "sections": [],
+      "contenttabs": [],
+      "tags": []
+    }
 
 
-### Model details
+### Meta details
 
 The plugin provides the following additional details: 
 
-- _model: The template name for the entry or matrix block.
-- _schema: A list of the fields and their Craft model type, e.g. `RichText` or `Entries`
-- _section: The name of the section
+* *_model*: The template name for the entry or matrix block.
+* *_schema*: A list of the fields and their Craft model type, e.g. `RichText` or `Entries`
+* *_section*: The name of the section
 
 
 
 ## To do
 
-- support for related users
-- automatic detection of cyclic models
+- Support for User entries
+- Detection of cyclic models
+- Max entry depth as a parameter
+- Support for creation and modification dates
+- Make schema toggleable via a plugin setting
