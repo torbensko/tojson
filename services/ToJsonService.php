@@ -32,9 +32,20 @@ class ToJsonService extends BaseApplicationComponent {
     $json['id'] = $entry->id;
     $json['slug'] = $entry->slug;
     $json['uri'] = $entry->uri;
+    if (isset($entry->postDate)) {
+      $json['postDate'] = $entry->postDate->format(DateTime::ATOM);
+    }
+    if (isset($entry->dateCreated)) {
+      $json['dateCreated'] = $entry->dateCreated->format(DateTime::ATOM);
+    }
+    if (isset($entry->dateUpdated)) {
+      $json['dateUpdated'] = $entry->dateUpdated->format(DateTime::ATOM);
+    }
 
     // $json['_schema'] = array();
     $fields = null;
+
+    
 
     // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
     // $json['_model'] = $json['_model'][count($json['_model']) - 1];
