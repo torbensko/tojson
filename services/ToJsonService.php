@@ -4,7 +4,9 @@ namespace Craft;
 
 class ToJsonService extends BaseApplicationComponent {
 
-  public function toJson($content, $entryDepth=2) {
+  private $ids = array();
+
+  public function toJson($content, $entryDepth = 1) {
 
     $json = array();
 
@@ -24,14 +26,25 @@ class ToJsonService extends BaseApplicationComponent {
   /*
    * Processes Entries, Assets, Matrix blocks, Tags and Categories.
    */
-  private function processModel($entry, $entryDepth=1) 
+  private function processModel($entry, $entryDepth = 1) 
   {
     $json = array();
 
     // Some basic details
-    $json['id'] = $entry->id;
+    $json['id'] = intval( $entry->id );
     $json['slug'] = $entry->slug;
-    $json['uri'] = $entry->uri;
+    if ( $entry->uri ) {
+      $json['uri'] = $entry->uri;
+    }
+
+    // Avoid circular dependencies
+    if ( $entryDepth < 0 || in_array($json['id'], $this->ids) ) {
+      // Return high level details
+      return $json;
+    } else {
+      array_push($this->ids, $json['id']);
+    }
+
     if (isset($entry->postDate)) {
       $json['postDate'] = $entry->postDate->format(DateTime::ATOM);
     }
@@ -49,13 +62,13 @@ class ToJsonService extends BaseApplicationComponent {
 
     // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
     // $json['_model'] = $json['_model'][count($json['_model']) - 1];
-
+    if ( $entry instanceof \Craft\EntryModel ) {
+      $json['_section'] = $entry->getSection()->handle;
+    }
     if ( $entry instanceof \Craft\EntryModel || $entry instanceof \Craft\MatrixBlockModel ) {
       $fields = $entry->getType()->getFieldLayout()->getFields();
-      $json['_model'] = $entry->getType()->handle;
-      if ( $entry instanceof \Craft\EntryModel ) {
-        $json['_section'] = $entry->getSection()->handle;
-      }
+      $json['_type'] = $entry->getType()->handle;
+      
     } else {
       // Tags, Categories
       $fields = $entry->getFieldLayout()->getFields();
@@ -139,13 +152,10 @@ class ToJsonService extends BaseApplicationComponent {
         case 'Tags':
         case 'Assets':
           // value => Craft\ElementCriteriaModel
-          $json[$name] = null;
-          if ( !($type == 'Entries' && $entryDepth <= 0) ) {
-            $json[$name] = array();
-            foreach ($value as $submodel) {
-              $subJson = $this->processModel($submodel, ($type == 'Entries' ? $entryDepth - 1 : $entryDepth));
-              array_push($json[$name], $subJson);
-            }
+          $json[$name] = array();
+          foreach ($value as $submodel) {
+            $subJson = $this->processModel($submodel, ($type == 'Entries' ? $entryDepth - 1 : $entryDepth));
+            array_push($json[$name], $subJson);
           }
           break;
 

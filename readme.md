@@ -1,9 +1,10 @@
 # toJSON
 
-A Craft plugin for exporting your entries to JSON. It provides the following features:
+A Craft plugin for exporting your entries to JSON that:
 
 - supports most field types including Entries, Matrix blocks and Assets
-- it applies all image transformation automatically
+- applies image transformation automatically
+- detects cyclic models
 
 The following is an example output of the plugin, noting that the content has been removed:
 
@@ -14,7 +15,7 @@ The following is an example output of the plugin, noting that the content has be
       "postDate": "2015-08-23T04:51:00+00:00",
       "dateCreated": "2015-08-23T04:51:53+00:00",
       "dateUpdated": "2015-08-29T02:01:13+00:00",
-      "_model": "post",
+      "_type": "post",
       "_section": "posts",
       "title": "...",
       "subtitle": "...",
@@ -59,7 +60,7 @@ The following is an example output of the plugin, noting that the content has be
           "uri": null,
           "dateCreated": "2015-08-23T05:20:04+00:00",
           "dateUpdated": "2015-08-29T02:01:13+00:00",
-          "_model": "markdown",
+          "_type": "markdown",
           "markdown": "..."
         },
         {
@@ -68,7 +69,7 @@ The following is an example output of the plugin, noting that the content has be
           "uri": null,
           "dateCreated": "2015-08-23T05:20:04+00:00",
           "dateUpdated": "2015-08-29T02:01:13+00:00",
-          "_model": "image",
+          "_type": "image",
           "image": [
             {
               "id": "12",
@@ -366,10 +367,10 @@ Your resulting JSON will look something like:
 
 ### Meta details
 
-The plugin provides the following additional details: 
+The plugin provides some additional details: 
 
-* *_model*: The template name for the entry or matrix block.
-* *_section*: The name of the section
+- **_section**: the name of the section.
+- **_type**: the entry/matrix block type.
 
 
 
