@@ -6,7 +6,7 @@ class ToJsonService extends BaseApplicationComponent {
 
   private $ids = array();
 
-  public function toJson($content, $entryDepth = 1) {
+  public function toJson($content, $entryDepth = -1) {
 
     $json = array();
 
@@ -26,7 +26,7 @@ class ToJsonService extends BaseApplicationComponent {
   /*
    * Processes Entries, Assets, Matrix blocks, Tags and Categories.
    */
-  private function processModel($entry, $entryDepth = 1) 
+  private function processModel($entry, $entryDepth = -1) 
   {
     $json = array();
 
@@ -38,7 +38,7 @@ class ToJsonService extends BaseApplicationComponent {
     }
 
     // Avoid circular dependencies
-    if ( $entryDepth < 0 || in_array($json['id'], $this->ids) ) {
+    if ( $entryDepth === 0 || in_array($json['id'], $this->ids) ) {
       // Return high level details
       return $json;
     } else {
