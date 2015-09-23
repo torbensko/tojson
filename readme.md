@@ -134,6 +134,21 @@ The following is an example output of the plugin, noting that the content has be
 
 - Done!
 
+## Options
+
+The filter has the following options, which can either be passed as an argument to the filter:
+
+    {{ entry | to_json(filter, depth) }}
+
+or as a request parameter:
+
+    foo/bar?filter=body|poster&depth=1
+
+The arguments are as follows:
+
+- **filter**: only the specified fields will be returned. The field names should be separated by a `|`.
+- **depth**: the maximum depth by which the entries and their related subentries are traversed.
+
 
 ## Advanced
 
@@ -377,7 +392,5 @@ The plugin provides some additional details:
 ## To do
 
 - Support for User entries
-- Detection of cyclic models
-- Max entry depth as a parameter
 - Add toggleable schema details
 - Make it possible to toggle the format of the dates

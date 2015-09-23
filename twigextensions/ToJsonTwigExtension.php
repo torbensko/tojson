@@ -13,9 +13,29 @@ class ToJsonTwigExtension extends \Twig_Extension {
 		);
 	}
 
-	public function toJsonFilter($entries) {
-		$expandedContent = craft()->toJson->toJson($entries);
-		return JsonHelper::encode($expandedContent);
+	public function toJsonFilter($entries, $filter, $depth = false) {
+
+		$allowableFields = array();
+
+		if ( !$filter ) {
+			$filter = craft()->request->getParam('filter');
+		}
+		if ( is_string($filter) && strlen($filter) ) {
+			$allowableFields = explode('|', $filter);
+		}
+		if ( !$depth ) {
+			$depth = craft()->request->getParam('depth');
+		}
+		if ( !is_int($depth) ) {
+			$depth = -1;
+		}
+
+		$expandedContent = craft()->toJson->toJson(
+				$entries, 
+				$allowableFields,
+				$depth);
+		
+		return JsonHelper::encode( $expandedContent );
 	}
 
 }

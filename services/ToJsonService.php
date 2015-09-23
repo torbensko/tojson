@@ -5,10 +5,14 @@ namespace Craft;
 class ToJsonService extends BaseApplicationComponent {
 
   private $ids = array();
+  private $allowableFields = array();
+  private $filterFields = false;
 
-  public function toJson($content, $entryDepth = -1) {
+  public function toJson($content, $allowableFields = array(), $entryDepth = -1) {
 
     $json = array();
+    $this->allowableFields = $allowableFields;
+    $this->filterFields = count($this->allowableFields);
 
     if ( is_array($content) ) {
       foreach ($content as $entry) {
@@ -133,15 +137,15 @@ class ToJsonService extends BaseApplicationComponent {
       $type = $fieldObj->type;
       $value = $entry->$name;
 
+      if ( $this->filterFields && !in_array($name, $this->allowableFields) ) {
+        $type = '_skip';
+      }
+
       // TODO: add more details for each field type, such as max/min for integers
       // $json['_schema'][$name] = array("type" => $type);
 
-      // Debug:
-      // $json[$name.'-'.$type] = $type;
-      // $json[$name.'-class'] = get_class($value);
-
       if ( $value === null ) {
-        break;
+        $type = '_skip';
       }
 
       switch ($type) {
@@ -202,6 +206,10 @@ class ToJsonService extends BaseApplicationComponent {
         case 'Lightswitch':
           // value => String
           $json[$name] = floatval($value);
+          break;
+
+        case '_skip':
+          // See above
           break;
 
         default:
