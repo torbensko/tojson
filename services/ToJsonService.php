@@ -49,25 +49,23 @@ class ToJsonService extends BaseApplicationComponent {
       array_push($this->ids, $json['id']);
     }
 
-    if (isset($entry->postDate)) {
-      $json['postDate'] = $entry->postDate->format(DateTime::ATOM);
-    }
-    if (isset($entry->dateCreated)) {
-      $json['dateCreated'] = $entry->dateCreated->format(DateTime::ATOM);
-    }
-    if (isset($entry->dateUpdated)) {
-      $json['dateUpdated'] = $entry->dateUpdated->format(DateTime::ATOM);
-    }
-
     // $json['_schema'] = array();
     $fields = null;
-
-    
 
     // $json['_model'] = preg_split("/[^\w]+/", get_class($entry));
     // $json['_model'] = $json['_model'][count($json['_model']) - 1];
     if ( $entry instanceof \Craft\EntryModel ) {
       $json['_section'] = $entry->getSection()->handle;
+
+      if (isset($entry->postDate)) {
+        $json['postDate'] = $entry->postDate->format(DateTime::ATOM);
+      }
+      if (isset($entry->dateCreated)) {
+        $json['dateCreated'] = $entry->dateCreated->format(DateTime::ATOM);
+      }
+      if (isset($entry->dateUpdated)) {
+        $json['dateUpdated'] = $entry->dateUpdated->format(DateTime::ATOM);
+      }
     }
     if ( $entry instanceof \Craft\EntryModel || $entry instanceof \Craft\MatrixBlockModel ) {
       $fields = $entry->getType()->getFieldLayout()->getFields();
