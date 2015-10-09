@@ -24,10 +24,10 @@ class ToJsonTwigExtension extends \Twig_Extension {
 			$allowableFields = explode('|', $filter);
 		}
 		if ( !$depth ) {
-			$depth = craft()->request->getParam('depth');
+			$depth = intval(craft()->request->getParam('depth'));
 		}
-		if ( !is_int($depth) ) {
-			$depth = -1;
+		if ( !$depth ) {
+			$depth = -1; // inifinite
 		}
 
 		$expandedContent = craft()->toJson->toJson(
