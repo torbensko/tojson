@@ -27,7 +27,7 @@ class ToJsonTwigExtension extends \Twig_Extension {
 			$depth = intval(craft()->request->getParam('depth'));
 		}
 		if ( !$depth ) {
-			$depth = -1; // inifinite
+			$depth = -1; // infinite
 		}
 
 		$expandedContent = craft()->toJson->toJson(

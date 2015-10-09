@@ -4,7 +4,6 @@ namespace Craft;
 
 class ToJsonService extends BaseApplicationComponent {
 
-  private $ids = array();
   private $allowableFields = array();
   private $filterFields = false;
 
@@ -30,7 +29,7 @@ class ToJsonService extends BaseApplicationComponent {
   /*
    * Processes Entries, Assets, Matrix blocks, Tags and Categories.
    */
-  private function processModel($entry, $entryDepth = -1) 
+  private function processModel($entry, $entryDepth, $priorEntries = array()) 
   {
     $json = array();
 
@@ -42,11 +41,11 @@ class ToJsonService extends BaseApplicationComponent {
     }
 
     // Avoid circular dependencies
-    if ( $entryDepth === 0 || in_array($json['id'], $this->ids) ) {
+    if ( $entryDepth === 0 || in_array($json['id'], $priorEntries) ) {
       // Return high level details
       return $json;
     } else {
-      array_push($this->ids, $json['id']);
+      array_push($priorEntries, $json['id']);
     }
 
     // $json['_schema'] = array();
@@ -156,7 +155,11 @@ class ToJsonService extends BaseApplicationComponent {
           // value => Craft\ElementCriteriaModel
           $json[$name] = array();
           foreach ($value as $submodel) {
-            $subJson = $this->processModel($submodel, ($type == 'Entries' ? $entryDepth - 1 : $entryDepth));
+            $subJson = $this->processModel(
+                $submodel, 
+                ($type == 'Entries' ? $entryDepth - 1 : $entryDepth),
+                $priorEntries);
+
             array_push($json[$name], $subJson);
           }
           break;
