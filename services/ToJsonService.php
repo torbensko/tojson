@@ -39,10 +39,14 @@ class ToJsonService extends BaseApplicationComponent {
     if ( $entry->uri ) {
       $json['uri'] = $entry->uri;
     }
+    if ( $entry->title ) {
+      $json['title'] = $entry->title;
+    }
 
-    // Avoid circular dependencies
+    // Have we gone too deep or have with found a circular structure
     if ( $entryDepth === 0 || in_array($json['id'], $priorEntries) ) {
       // Return high level details
+      $json['_abstract'] = true;
       return $json;
     } else {
       array_push($priorEntries, $json['id']);
@@ -73,9 +77,6 @@ class ToJsonService extends BaseApplicationComponent {
     } else {
       // Tags, Categories
       $fields = $entry->getFieldLayout()->getFields();
-    }
-    if ( $entry->title ) {
-      $json['title'] = $entry->title;
     }
     
     // Apply the image transformations
