@@ -13,7 +13,7 @@ class ToJsonTwigExtension extends \Twig_Extension {
 		);
 	}
 
-	public function toJsonFilter($entries, $filter, $depth = false) {
+	public function toJsonFilter($entries, $filter = false, $depth = false) {
 
 		$allowableFields = array();
 
