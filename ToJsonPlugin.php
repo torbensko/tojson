@@ -15,7 +15,7 @@ class ToJsonPlugin extends BasePlugin
 
 	public function getVersion()
 	{
-		return '0.8.2';
+		return '0.9.0';
 	}
 
 	public function getDeveloper()
@@ -42,6 +42,18 @@ class ToJsonPlugin extends BasePlugin
 		craft()->log->removeRoute('WebLogRoute');
 		craft()->log->removeRoute('ProfileLogRoute');
 		parent::init();
+	}
+
+	protected function defineSettings() {
+    return array(
+    	'linkUrl' => array(AttributeType::String, 'default' => craft()->getSiteUrl()),
+    );
+  }
+
+  public function getSettingsHtml() {
+		return craft()->templates->render('tojson/_settings', array(
+			'settings' => $this->getSettings()
+		));
 	}
 
 }

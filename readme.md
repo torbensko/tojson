@@ -2,11 +2,12 @@
 
 A Craft plugin for exporting your entries to JSON that:
 
-- supports most field types including Entries, Matrix blocks and Assets
-- applies image transformation automatically
-- detects cyclic models
+- supports most field types including Entries, Matrix blocks and Assets,
+- applies all transformations to every image,
+- detects cyclic models, and
+- provides a settings screen
 
-The following is an example output of the plugin, noting that the content has been removed:
+The following is an example of what the plugin outputs, noting that the content has been removed:
 
     {
       "id": "1",

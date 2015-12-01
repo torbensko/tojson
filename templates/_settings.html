@@ -1,0 +1,12 @@
+{% import '_includes/forms' as forms %}
+
+{{ 
+	forms.textField({
+      label: "Site URL in links"|t,
+      id: 'linkUrl',
+      name: 'linkUrl',
+      instructions: "Override the URL used in links"|t,
+      value: settings.linkUrl,
+      errors: settings.getErrors('linkUrl')
+  	}) 
+}}

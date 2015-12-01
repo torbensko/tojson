@@ -7,7 +7,19 @@ class ToJsonService extends BaseApplicationComponent {
   private $allowableFields = array();
   private $filterFields = false;
 
+  public function getLinkUrl() {
+    $plugin = craft()->plugins->getPlugin("tojson");
+    $settings = $plugin->getSettings();
+    return $settings->linkUrl;
+  }
+
   public function toJson($content, $allowableFields = array(), $entryDepth = -1) {
+
+    // Allow the user to specify a different URL for links
+    $linkUrl = $this->getLinkUrl();
+    if ( $linkUrl ) {
+      craft()->setSiteUrl( $linkUrl );
+    }
 
     $json = array();
     $this->allowableFields = $allowableFields;
@@ -166,7 +178,7 @@ class ToJsonService extends BaseApplicationComponent {
           break;
 
         case 'RichText':
-          $json[$name] = $value->getRawContent();
+          $json[$name] = "".$value;
           break;
 
         case 'RadioButtons':
